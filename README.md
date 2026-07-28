@@ -143,7 +143,6 @@ jupyter notebook Assignment-7.ipynb
 Assignment_7/
 │
 ├── Assignment-7.ipynb
-├── Assignment-7.py
 ├── README.md
 ├── elbow_curve.png
 ├── cluster_scatter.png
