@@ -1,129 +1,104 @@
-# Medical Insurance Cost Prediction using Multiple Linear Regression
-
-**Assignment 1 – AI/ML**
+# Assignment 7 — Customer Segmentation using K-Means Clustering and PCA
 
 ## Objective
+To segment mall customers into distinct groups based on their annual income and
+spending behavior using **K-Means Clustering**, and to visualize these segments
+in two dimensions using **Principal Component Analysis (PCA)**. The resulting
+segments are intended to support targeted marketing strategies for the mall's
+management.
 
-To develop a Multiple Linear Regression model that predicts an individual's
-medical insurance `charges` based on personal and health-related attributes
-(age, sex, BMI, number of children, smoking status, and region), and to
-evaluate the model's performance.
+## Dataset
+**Mall Customer Segmentation Dataset** (Kaggle)
+🔗 https://www.kaggle.com/datasets/vjchoudhary7/customer-segmentation-tutorial-in-python
 
-## Dataset Link
+The dataset contains 200 records with the following columns:
+- `CustomerID` — unique identifier
+- `Genre` — customer gender
+- `Age` — customer age
+- `Annual Income (k$)` — annual income in thousands of dollars
+- `Spending Score (1-100)` — score assigned based on spending behavior
 
-**Medical Cost Personal Insurance Dataset (Kaggle)**
-https://www.kaggle.com/datasets/mirichoi0218/insurance
-
-> Note: The dataset is **not** included in this repository. Please download
-> `insurance.csv` from the Kaggle link above and place it in the project root
-> before running the notebook/script.
+> **Note:** The raw dataset is **not included** in this repository per the
+> submission instructions. Please download `Mall_Customers.csv` from the
+> Kaggle link above and place it in the project root before running the code.
 
 ## Libraries Used
-
-- `pandas` – data loading and manipulation
-- `numpy` – numerical operations
-- `matplotlib` – plotting (Actual vs Predicted scatter plot)
-- `scikit-learn` – `train_test_split`, `LinearRegression`, `LabelEncoder`,
-  evaluation metrics (`mean_absolute_error`, `mean_squared_error`, `r2_score`)
+- `pandas` — data loading and manipulation
+- `numpy` — numerical operations
+- `matplotlib` / `seaborn` — visualization
+- `scikit-learn` — `StandardScaler`, `LabelEncoder`, `KMeans`, `PCA`
 
 ## Methodology
-
-1. **Data Understanding**
-   - Loaded the dataset with Pandas and inspected the first five records.
-   - Identified feature types:
-     - Numerical: `age`, `bmi`, `children`
-     - Categorical: `sex`, `smoker`, `region`
-     - Target: `charges`
-
-2. **Data Preprocessing**
-   - Checked for missing values (none found).
-   - Encoded `sex` and `smoker` using Label Encoding (binary categories).
-   - Encoded `region` using One-Hot Encoding (multi-class category),
-     dropping the first category to avoid the dummy-variable trap.
-   - Split the data into 80% training and 20% testing sets
-     (`random_state=42` for reproducibility).
-
+1. **Data Understanding** — Loaded the dataset, inspected the first five
+   records, identified numerical (`Age`, `Annual Income`, `Spending Score`)
+   and categorical (`Genre`) features, and reviewed dataset info/statistics.
+2. **Data Preprocessing** — Checked for missing values (none found), dropped
+   the `CustomerID` column, label-encoded `Genre`, and standardized the
+   numerical features (`Annual Income`, `Spending Score`) using `StandardScaler`.
 3. **Model Development**
-   - Trained a `LinearRegression` model on all encoded features
-     (age, sex, bmi, children, smoker, region) to predict `charges`.
-   - Generated predictions on the held-out test set.
-
-4. **Model Evaluation**
-   - Computed MAE, MSE, RMSE, and R² on the test set.
-   - Plotted Actual vs Predicted charges (see `actual_vs_predicted.png`).
+   - Used the **Elbow Method** (K = 1 to 10) to identify the optimal number
+     of clusters based on inertia.
+   - Trained a final **K-Means** model with the selected K (K = 5) and
+     assigned cluster labels to each customer.
+   - Applied **PCA** to reduce the standardized features to 2 principal
+     components for visualization.
+4. **Visualization and Evaluation** — Plotted the elbow curve, a scatter plot
+   of clusters on the original feature space (Income vs Spending Score), and
+   a PCA-based 2D scatter plot colored by cluster label.
+5. **Conclusion** — Summarized findings, business use cases, one limitation
+   of K-Means, and one advantage of PCA.
 
 ## Results
+- **Optimal number of clusters (K):** 5, determined via the elbow curve.
+- **PCA:** The 2 principal components together explain effectively all of
+  the variance in the (2-feature) standardized data used for clustering.
+- **Identified segments:**
 
-| Metric | Value |
-|--------|-------|
-| MAE    | 4,181.19 |
-| MSE    | 33,596,915.85 |
-| RMSE   | 5,796.28 |
-| R²     | 0.7836 |
+| Cluster | Avg. Income | Avg. Spending Score | Profile |
+|---------|-------------|----------------------|---------|
+| 0 | Mid | Mid | Average / typical customers |
+| 1 | High | Low | Cautious high-earners (under-targeted) |
+| 2 | Low | Low | Budget-conscious shoppers |
+| 3 | High | High | Premium, most valuable customers |
+| 4 | Low | High | Value-seeking spenders |
 
-**Model coefficients:**
+*(Exact cluster order/labels may vary slightly by run; see `customer_segments_output.csv` for the actual run's assignments.)*
 
-| Feature | Coefficient |
-|---|---|
-| age | 256.98 |
-| sex | -18.59 |
-| bmi | 337.09 |
-| children | 425.28 |
-| smoker | 23,651.13 |
-| region_northwest | -370.68 |
-| region_southeast | -657.86 |
-| region_southwest | -809.80 |
-| Intercept | -11,931.22 |
-
-**Observations:**
-
-1. **Smoking status is the dominant driver of cost** — its coefficient (~23,651)
-   dwarfs every other feature's, meaning smokers are billed dramatically higher
-   charges than non-smokers, all else being equal.
-2. **Age and BMI have a positive, moderate effect** on charges, matching the
-   intuition that older and higher-BMI individuals tend to incur higher
-   medical costs.
-3. **The model explains about 78% of the variance** in charges (R² ≈ 0.78),
-   but the scatter plot shows two distinct clusters (smokers vs. non-smokers)
-   and larger errors at higher charge values, suggesting the true relationship
-   isn't perfectly linear and that interaction effects (e.g., BMI × smoker)
-   aren't captured by this simple model.
-
-![Actual vs Predicted Charges](actual_vs_predicted.png)
+Generated visualizations:
+- `elbow_curve.png` — Elbow Method plot for choosing K
+- `cluster_scatter.png` — Customer segments on Income vs Spending Score
+- `pca_visualization.png` — Clusters projected onto 2 PCA components
 
 ## Conclusion
-
-The Multiple Linear Regression model built on age, sex, BMI, number of
-children, smoking status, and region provides a reasonable first
-approximation of medical insurance charges, achieving an R² of about 0.78 on
-the held-out test set. Among all predictors, **smoking status** emerges as by
-far the strongest driver of cost, followed by **age** and **BMI**, while
-**sex**, **number of children**, and **region** contribute comparatively
-little to the prediction. These findings align with real-world expectations,
-since smoking and higher BMI are well-known risk factors for chronic illness,
-which insurers price into premiums. However, a key **limitation of Linear
-Regression** here is its assumption of a strictly linear, additive
-relationship between features and charges; in reality, factors like smoking
-and BMI likely interact (e.g., a high-BMI smoker may cost disproportionately
-more than the sum of their individual effects), and charges are also
-right-skewed with outliers — both of which a simple linear model cannot fully
-capture. More flexible models (e.g., polynomial regression, tree-based
-ensembles) could likely improve predictive accuracy.
-
-## Repository Structure
-
-```
-.
-├── Assignment-1.ipynb        # Jupyter notebook (full analysis)         
-├── actual_vs_predicted.png   # Actual vs Predicted scatter plot
-└── README.md
-```
+This project applied K-Means clustering to segment mall customers based on
+their annual income and spending score, identifying five distinct groups
+ranging from low-income budget shoppers to high-income premium spenders. The
+Elbow Method confirmed five clusters as the optimal choice, and PCA was used
+to project the data into two dimensions for clear visualization, showing
+well-separated, meaningful segments. From a business perspective, these
+segments enable the mall's management to design targeted marketing
+campaigns — for example, loyalty rewards for high-income/high-spending
+customers and promotional offers to convert high-income/low-spending
+customers into active spenders. A key limitation of K-Means is that it
+requires the number of clusters (K) to be specified in advance and assumes
+spherical, similarly-sized clusters, which may not always reflect real
+customer behavior. An advantage of PCA is that it reduces dimensionality
+while retaining most of the data's variance, making complex, multi-feature
+customer data easier to visualize and interpret without significant loss
+of information.
 
 ## How to Run
-
 ```bash
-pip install pandas numpy matplotlib scikit-learn
-# Download insurance.csv from the Kaggle link above into this folder
-python Assignment-1.py
-# or open Assignment-1.ipynb in Jupyter
+pip install pandas numpy matplotlib seaborn scikit-learn
+python Assignment-7.py
+# or open Assignment-7.ipynb in Jupyter and run all cells
+```
+
+## Repository Structure
+```
+├── Assignment-7.ipynb          # Main notebook (all 4 tasks)            
+├── README.md                   # This file
+├── elbow_curve.png             # Output plot
+├── cluster_scatter.png         # Output plot
+└── pca_visualization.png       # Output plot
 ```
